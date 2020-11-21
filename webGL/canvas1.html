@@ -16,7 +16,7 @@
 
 
     /* ctx.beginPath();
-    ctx.lineTo(75, 50);  // 第一个lineTo，将默认变成moveTo
+    ctx.lineTo(75, 50);  
     ctx.lineTo(100, 75);
     ctx.lineTo(100, 25);
     ctx.fill(); */  
@@ -59,6 +59,12 @@
     ctx.bezierCurveTo(230, 62.5, 230, 25, 200, 25);
     ctx.bezierCurveTo(185, 25, 175, 37, 175, 40);
     ctx.fill(); */
+
+    var p = new Path2D();
+    p.rect(10, 10, 50, 50);
+    p.moveTo(125, 35)
+    p.arc(100, 35, 25, 0, 2 * Math.PI);
+    ctx.stroke(p);
 
 
 

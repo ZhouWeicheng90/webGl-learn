@@ -75,7 +75,6 @@
 </svg>
 
 <!-- ****************path******************** -->
-<!-- 贝塞尔曲线： -->
 <svg width="190px" height="160px" version="1.1" xmlns="http://www.w3.org/2000/svg">
     <path d="M10 10 C 10 80, 60 80, 60 10" stroke="black" fill="transparent" />
     <path d="M10 80 C 40 10, 65 10, 95 80 C 125 150, 150 150, 180 80" stroke="black" fill="transparent" />
@@ -102,11 +101,7 @@
 
 <svg width="190px" height="160px">
     <path d="M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80" stroke="black" stroke-width="1" fill="transparent"
-        stroke-dasharray="3" />
-    <!-- fill 和 stroke 都是颜色，而fill-opacity和stroke-opacity是透明度的，如果颜色写了个rgba的值，又同时设置了xxx-opacity属性，那么两个不透明度信息都会叠加起作用。-->
-    <!-- stroke-width、 -->
-    <!-- stroke-linecap定义线的断点形状 和 stroke-linejoin 定义两个线之间的链接处的处理-->
-    <!-- stroke-dasharray 灵活定义各种虚线，一组数字被依次循环使用，实线长度，虚线长度。如 5,3,5 表示： 5实 3虚 5实 5虚 3实 5虚 5实 …… 注意第一段从实现开始 -->
+        stroke-dasharray="3,2" />   
 </svg>
 <img src="./stroke.jpg">
 

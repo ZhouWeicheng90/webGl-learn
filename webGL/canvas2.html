@@ -3,25 +3,64 @@
     const canvas = document.getElementById('cvs')
     var ctx = canvas.getContext('2d');
 
-    /*  var rectangle = new Path2D();
-     rectangle.rect(10, 10, 50, 50);
-     var circle = new Path2D();
-     circle.arc(100, 35, 25, 0, 2 * Math.PI); 
-     ctx.stroke(rectangle);
-     ctx.fill(circle); */
-
-    // 使用svg path data：
-    var p = new Path2D('M10 10 h 80 v 80 h -80 Z');
+    /* // 使用svg path data：
+    var p2 = new Path2D('M10 10 h 80 v 80 h -80 Z');
+    var p3 = new Path2D('M45 45 h 80 v 80 h -80 Z');    
     ctx.globalAlpha = 0.5
-    ctx.fillStyle="rgba(50,255,12,0.5)"
-    var p2 = new Path2D('M45 45 h 80 v 80 h -80 Z');
-    ctx.fill(p)
-    ctx.fillStyle="rgb(50,255,12)"
+    ctx.fillStyle = "rgba(50,255,12,0.5)"
     ctx.fill(p2)
+    ctx.fillStyle = "rgb(50,255,12)"
+    ctx.fill(p3) */
 
-    // new Path2D();     // empty path object
-    // new Path2D(path); // copy from another Path2D object
-    // new Path2D(d);    // path from SVG path data
+    /* ctx.strokeStyle = '#09f';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-5, 50, 160, 50);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 10;
+
+    ctx.miterLimit = 5;// 设置这个看变化
+
+    ctx.beginPath();
+    ctx.moveTo(0, 100);
+    for (i = 0; i < 24; i++) {
+        var dy = i % 2 == 0 ? 25 : -25;
+        ctx.lineTo(Math.pow(i, 1.5) * 2, 75 + dy);
+    }
+    ctx.stroke(); */
+
+    /* ctx.beginPath()
+    ctx.moveTo(10.5, 10.5)
+    ctx.lineTo(70, 10.5)
+    ctx.setLineDash([5, 2, 5]);
+    ctx.lineDashOffset = -5;
+    ctx.stroke()
+
+    ctx.beginPath()
+    ctx.moveTo(10.5, 1)
+    ctx.lineTo(10.5,21)
+    ctx.lineDashOffset = 0;
+    ctx.setLineDash([1000])
+    ctx.stroke() */
+
+    /* var lineargradient = ctx.createLinearGradient(0, 0, 150, 150);
+    lineargradient.addColorStop(0.25, 'white');
+    lineargradient.addColorStop(0.5, 'red');
+    lineargradient.addColorStop(0.5, 'blue');
+    lineargradient.addColorStop(0.75, 'black');
+
+    ctx.fillStyle = lineargradient;
+    ctx.fillRect(10, 10, 130, 130); */
+
+
+    // 创建渐变
+    var radgrad = ctx.createRadialGradient(45, 45, 10, 52, 50, 30);
+    radgrad.addColorStop(0, '#A7D30C');
+    radgrad.addColorStop(0.9, '#019F62');
+    radgrad.addColorStop(1, 'rgba(1,159,98,0)');
+
+    ctx.fillStyle = radgrad;
+    ctx.fillRect(0, 0, 150, 150);
+    ctx.strokeRect(0,0, 150, 150)
 
 
 </script>
