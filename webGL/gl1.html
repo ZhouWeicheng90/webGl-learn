@@ -1,0 +1,113 @@
+<canvas id="cvs" style="border: 1px solid #eee;" width="500" height="500">你的浏览器不支持canvas</canvas>
+<style>
+    #cvs {
+        width: 500px;
+    }
+</style>
+<script id="vertex-shader-2d" type="notjs">
+
+    // 一个属性变量，将会从缓冲中获取数据
+    attribute vec4 a_position;
+   
+    // 所有着色器都有一个main方法
+    void main() {
+   
+      // gl_Position 是一个顶点着色器主要设置的变量
+      gl_Position = a_position;
+    }
+   
+</script>
+
+<script id="fragment-shader-2d" type="notjs">
+
+    // 片断着色器没有默认精度，所以我们需要设置一个精度
+    // mediump是一个不错的默认值，代表“medium precision”（中等精度）
+    precision mediump float;
+   
+    void main() {
+      // gl_FragColor是一个片断着色器主要设置的变量
+      gl_FragColor = vec4(1, 0, 0.5, 1); // 返回“瑞迪施紫色”
+    }
+   
+</script>
+<script>
+    const canvas = document.getElementById('cvs')
+    /** @type {WebGLRenderingContext } */
+    const gl = canvas.getContext('webgl');
+    if (!gl) {
+        alert("无法初始化WebGL，你的浏览器、操作系统或硬件等可能不支持WebGL。");
+    }
+
+    //********************************* 创建着色器方法，输入参数：渲染上下文，着色器类型，数据源:************************************
+    function createShader(gl, type, source) {
+        var shader = gl.createShader(type); // 创建着色器对象
+        gl.shaderSource(shader, source); // 提供数据源
+        gl.compileShader(shader); // 编译 -> 生成着色器
+        var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+        if (success) {
+            return shader;
+        }
+
+        console.log(gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+    }
+    const vertexShader = createShader(gl, gl.VERTEX_SHADER, document.querySelector("#vertex-shader-2d").text);
+    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, document.querySelector("#fragment-shader-2d").text);
+
+
+    // ******************************将这两个着色器 link（链接）到一个 program（着色程序）:*********************************************
+    function createProgram(gl, vertexShader, fragmentShader) {
+        var program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+        var success = gl.getProgramParameter(program, gl.LINK_STATUS);
+        if (success) {
+            return program;
+        }
+
+        console.log(gl.getProgramInfoLog(program));
+        gl.deleteProgram(program);
+    }
+    const program = createProgram(gl, vertexShader, fragmentShader);
+
+    // **********************设置好状态并 为GLSL着色程序提供数据:*************
+    var positionAttributeLocation = gl.getAttribLocation(program, "a_position");   // 找到 属性a_position 的位置。 属性a_position是定点着色器的属性，是唯一的输入          
+    gl.enableVertexAttribArray(positionAttributeLocation);  // 激活属性， 开启从缓冲中获取数据
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());  // 创建一个buffer，绑定到ARRAY_BUFFER 绑定点上（可以把绑定点想象成一个全局变量，接下来就可以通过绑定点操作创建的buffer了    
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 0, 0.5, 0.7, 0,]), gl.STATIC_DRAW);  // 通过绑定点ARRAY_BUFFER 向缓存区中添加数据。这里添加了三个二维点坐标。
+    // webGl是强类型的，所以这里用了 Float32Array。最后一个参数 gl.STATIC_DRAW，表示不会经常改变这些数据。  
+
+
+    gl.useProgram(program);  // 告诉它用我们之前写好的着色程序（一个着色器对）
+    // 先指定颜色，然后用指定的颜色清除缓冲区：
+    gl.clearColor(0, 0, 0, .1);   // rgba 黑色    
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+
+    // ---------------- 以上代码是一些初始化工作，核心是设置了三角形的点，这些代码在页面加载时只会运行一次
+    // ----------------  接下来的代码是渲染代码，而这些代码将在我们每次要渲染或者绘制时执行
+
+    // 告诉属性怎么从positionBuffer中读取数据 (ARRAY_BUFFER)
+    var normalize = false; // 不需要归一化数据
+    var stride = 0;        // 0 = 移动单位数量 * 每个单位占用内存（sizeof(type)）, 每次迭代运行运动多少内存到下一个数据开始点
+    var offset = 0;        // 从缓冲起始位置开始读取
+    gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, normalize, stride, offset)
+    // 2:每次迭代运行提取2个单位数据;  注意实际变量positionAttributeLocation类型是 vec4，默认 0,0,0,1 。从缓冲区取两个数，x，y后面两个还是不变的默认值0,1 。
+    // 每次从缓冲区中取两个数据参数一个vec4，一个vec4有4个数据，所以只有前两个被不断修改。
+    // gl.FLOAT:每个单位的数据类型是32位浮点型
+    // vertexAttribPointer 方法告诉显卡从当前绑定的缓冲区（bindBuffer()指定的缓冲区,绑定到ARRAY_BUFFER的缓冲区）中读取顶点数据，绑定到 vertex-shader的变量中。
+    // 这里仅仅是定义取数据的方式！
+
+    gl.drawArrays(gl.TRIANGLES, 0, 3); // 参数0是offset  
+    // 3：定点着色器将允许3次，从前一句的配置中，一共取前6个数据！
+    // gl.TRIANGLES 三角形，着色器每允许三次就会绘制一个三角形。
+
+    // 只是简单的传递了位置信息，就可以绘制一个三角形！
+    // 如果你想做三维渲染，你需要提供合适的着色器将三维坐标转换到裁剪空间坐标，因为WebGL只是一个光栅化API。
+
+
+
+
+</script>
