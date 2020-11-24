@@ -1,4 +1,9 @@
 <canvas id="cvs" style="border: 1px solid #eee;" width="500" height="500">你的浏览器不支持canvas</canvas>
+<style>
+    body{
+        background-color: aqua;
+    }
+</style>
 <script>
     const canvas = document.getElementById('cvs')
     var ctx = canvas.getContext('2d');
@@ -53,14 +58,11 @@
 
 
     // 创建渐变
-    var radgrad = ctx.createRadialGradient(45, 45, 10, 52, 50, 30);
+    /* var radgrad = ctx.createRadialGradient(45, 45, 10, 52, 50, 30);
     radgrad.addColorStop(0, '#A7D30C');
     radgrad.addColorStop(0.9, '#019F62');
     radgrad.addColorStop(1, 'rgba(1,159,98,0)');
-
     ctx.fillStyle = radgrad;
     ctx.fillRect(0, 0, 150, 150);
-    ctx.strokeRect(0,0, 150, 150)
-
-
-</script>
+    ctx.strokeRect(0, 0, 150, 150) */
+ </script>
