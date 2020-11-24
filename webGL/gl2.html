@@ -1,0 +1,89 @@
+<canvas id="cvs" style="border: 1px solid #eee;" width="500" height="500">你的浏览器不支持canvas</canvas>
+<script id="vertext-shader" type="glsl">
+    attribute vec4 a_position;
+    uniform vec2 u_resolution;
+    void main() {
+        vec2 zeroToOne = a_position.xy / u_resolution;
+        vec2 zeroToTwo = zeroToOne * 2.0;
+        vec2 clipSpace = zeroToTwo - 1.0;
+        gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+    }
+
+</script>
+<script id="fragement-shader" type="glsl">
+    precision mediump float;
+    uniform vec4 u_color;
+    void main() {       
+        gl_FragColor = u_color; 
+      }
+</script>
+<script>
+    /** @type {HTMLCanvasElement} */
+    const canvas = document.getElementById('cvs')
+    const gl = canvas.getContext('webgl');
+
+    function createShader(type, script) {
+        const shader = gl.createShader(type)
+        gl.shaderSource(shader, script)
+        gl.compileShader(shader)
+        if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            return shader
+        }
+        console.error(gl.getShaderInfoLog(shader))
+        gl.deleteShader(shader)
+    }
+    function createProgram(vertexShader, fragmentShader) {
+        const program = gl.createProgram()
+        gl.attachShader(program, vertexShader)
+        gl.attachShader(program, fragmentShader)
+        gl.linkProgram(program)
+        if (gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            return program
+        }
+        console.error(gl.getProgramInfoLog(program))
+        gl.deleteProgram(program)
+
+    }
+    const program = createProgram(
+        createShader(gl.VERTEX_SHADER, document.getElementById("vertext-shader").text),
+        createShader(gl.FRAGMENT_SHADER, document.getElementById("fragement-shader").text)
+    )
+
+    // ----------- 产生 着色程序后 的固定代码
+    var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+    var resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
+    var colorUniformLocation = gl.getUniformLocation(program, "u_color");
+
+    gl.clearColor(0, 0, 0, .1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(program);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.enableVertexAttribArray(positionAttributeLocation);
+    gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+    gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+    // ----------- 你可以动态设置矩形区域和颜色，最后绘制（绘制必须放在最后，之前的所有代码顺序都不重要）------  
+    // 矩形实际上只需要4个数：
+    function drawRect(x, y, w, h) {
+        let arr = [x, y, x + w, y, x, y + h,
+            x, y + h, x + w, y, x + w, y + h]
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(arr), gl.STATIC_DRAW);
+
+        gl.uniform4f(colorUniformLocation, Math.random(), Math.random(), Math.random(), 1);
+
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+    function randomInt(range) {
+        return Math.floor(Math.random() * range);
+    }
+    drawRect(randomInt(300), randomInt(300), randomInt(300), randomInt(300))
+    drawRect(randomInt(300), randomInt(300), randomInt(300), randomInt(300))
+    drawRect(randomInt(300), randomInt(300), randomInt(300), randomInt(300))
+
+
+    // webglUtils 封装:
+    // var program = webglUtils.createProgramFromScripts(gl, ["vertex-shader", "fragment-shader"]);
+    // webglUtils.resizeCanvasToDisplaySize(gl.canvas);
+    // gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);  // 无关代码，先省略略
+
+</script>
