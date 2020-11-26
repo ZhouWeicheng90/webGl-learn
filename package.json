@@ -1,0 +1,22 @@
+{
+  "name": "webgl-learn",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "serve": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZhouWeicheng90/webGl-learn.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ZhouWeicheng90/webGl-learn/issues"
+  },
+  "homepage": "https://github.com/ZhouWeicheng90/webGl-learn#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}

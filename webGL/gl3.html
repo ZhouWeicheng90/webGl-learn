@@ -14,7 +14,7 @@
 </script>
 <script id="fragement-shader" type="glsl">
     precision mediump float;
-    varying vec4 v_color;
+    varying vec4 v_color;   // 顶点着色器 同名的变量 实现传值
     
     void main() {       
         gl_FragColor = v_color; 
@@ -54,7 +54,7 @@
 
     // ----------- 产生 着色程序后 的固定代码
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([200, 50, 350, 275, 25, 350]), gl.STATIC_DRAW); 
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([200, 50, 350, 275, 25, 350]), gl.STATIC_DRAW);
     gl.clearColor(0, 0, 0, .1);
     gl.clear(gl.COLOR_BUFFER_BIT);
     var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
@@ -64,7 +64,19 @@
     gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);  // 必须使用program后    
     gl.enableVertexAttribArray(positionAttributeLocation); // 建议使用program后    
     gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0); // 建议使用program后    
+    // ---------------
 
-    
+
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+    /**
+     调用了三次顶点着色器，所以也只计算出了三个颜色值， 但是我们的三角形却有很多颜色，这就是称之为可变量的 varying 的原因啦！
+     每一个像素在调用片断着色器时,再计算对应的颜色值。
+     varying 是一种顶点着色器给片断着色器传值的方式，定义同名变量。
+
+     难道？ 片段着色器 其他的颜色 是根据三个顶点处的颜色计算出来的吗？
+
+     ？ 多个attributes绑定多个缓冲区，结果都是通过 gl.ARRAY_BUFFER ,这是怎么对应的呢？ 
+     通过 bindBuffer 命令！ 向缓冲区中放数据前需要bind，读取缓冲区也需要bind，到目前为止由于只用了一个缓冲区，所以只bind了一次。
+     bind就是指明 当前全局的绑定点 gl.ARRAY_BUFFER 和那个buffer绑定
+    */
 </script>

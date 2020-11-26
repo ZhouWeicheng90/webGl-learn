@@ -1,8 +1,6 @@
-webGL 使用基于 OpenGL ES 2.0
 
-**GLSL ** 为  **OpenGL** 着色语言，GLSL是一种强类型语言
 
-#### 4种上下文： 
+#### canvas 4种上下文： 
 
 webgl 对应 WebGLRenderingContext ：https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext  浏览器支持webgl才行
 
@@ -12,13 +10,17 @@ bitmaprenderer   实验性
 
 webgl2  实验性 高级的webgl
 
-
+#### webgl简介
 
 
 
 渲染管线
 
 图形管线
+
+webGL 使用基于 OpenGL ES 2.0
+
+**GLSL ** 为  **OpenGL** 着色语言，GLSL是一种强类型语言
 
 事实上WebGL仅仅是一个光栅化引擎，一切取决于你如何组织点，线，三角形。
 WebGL在电脑的GPU中运行，因此你需要使用能够在GPU上运行的代码。WebGL在GPU上的工作基本上分为两部分，第一部分是将顶点（或数据流）转换到裁剪空间坐标， 第二部分是基于第一部分的结果绘制像素点。
@@ -34,9 +36,13 @@ WebGL在电脑的GPU中运行，因此你需要使用能够在GPU上运行的代
 
 几乎整个WebGL API都是关于如何设置这些成对方法的状态值以及运行它们。对于想要绘制的每一个对象，都需要先设置一系列状态值，然后通过调用 `gl.drawArrays` 或 `gl.drawElements` 运行一个着色方法对，使得你的着色器对能够在GPU上运行。
 
-#### 着色器获取数据的4种途径
+The only functions that actually write pixels are `gl.clear`, `gl.drawArrays` and `gl.drawElements`. 
 
-**属性 attribute**
+#### 4种数据方式
+
+##### 属性 attribute
+
+专门用于：从缓冲中获取的数据
 
 （缓冲区：通常存放位置，法向量，纹理坐标，顶点颜色值等，你可以存储任何数据）
 
@@ -50,17 +56,82 @@ uniform vec4 u_color;    // 全局颜色变量
 
 
 
-**全局变量 uniform**
+##### 全局变量 uniform
+
+专门用于：在一次绘制中对所有顶点保持一致值
 
 全局变量在着色程序运行前赋值，在运行过程中全局有效。程序运行，通常是调用drawArrays或drawElements 等方法
 
-纹理 texture 
+全局变量属于单个着色程序，如果多个着色程序有同名全局变量，需要找到每个全局变量并设置自己的值。 我们调用`gl.uniform???`的时候只是设置了**当前程序**的全局变量，当前程序是传递给`gl.useProgram` 的最后一个程序。
+
+##### 数组使用技巧（v字尾的）
+
+一个数组可以一次设置所有的全局变量，例如
+
+```glsl
+// 着色器里
+uniform vec2 u_someVec2[3]; 
+
+// JavaScript 初始化时
+var someVec2Loc = gl.getUniformLocation(someProgram, "u_someVec2"); 
+// 渲染的时候
+gl.uniform2fv(someVec2Loc, [1, 2, 3, 4, 5, 6]);  // 设置数组 u_someVec2
+```
+
+如果你想单独设置数组中的某个值，就要单独找到该值的地址。
+
+```glsl
+// JavaScript 初始化时
+var someVec2Element0Loc = gl.getUniformLocation(someProgram, "u_someVec2[0]");
+var someVec2Element1Loc = gl.getUniformLocation(someProgram, "u_someVec2[1]");
+var someVec2Element2Loc = gl.getUniformLocation(someProgram, "u_someVec2[2]"); 
+// 渲染的时候
+gl.uniform2fv(someVec2Element0Loc, [1, 2]);  // set element 0
+gl.uniform2fv(someVec2Element1Loc, [3, 4]);  // set element 1
+gl.uniform2fv(someVec2Element2Loc, [5, 6]);  // set element 2
+```
+
+##### 纹理 texture 
+
+专门用于：从像素或纹理元素中获取的数据
+
+在着色器中获取纹理信息，可以先创建一个`sampler2D`类型全局变量，然后用GLSL方法`texture2D` 从纹理中提取信息。
+
+``` glsl
+precision mediump float;
+ 
+uniform sampler2D u_texture;
+ 
+void main() {
+   vec2 texcoord = vec2(0.5, 0.5)  // 获取纹理中心的值
+   gl_FragColor = texture2D(u_texture, texcoord);
+}
+```
+
+仅看问题部分：https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-shaders-and-glsl.html#textures-
+
+##### 可变量 varying 
+
+是一种顶点着色器给片断着色器传值的方式。
+
+##### 结构体
 
 暂未涉及
 
-可变量 varying 
+``` glsl
+struct SomeStruct {
+  bool active;
+  vec2 someVec2;
+};
+uniform SomeStruct u_someThing;
+```
 
-暂未涉及
+``` js
+var someThingActiveLoc = gl.getUniformLocation(someProgram, "u_someThing.active");
+var someThingSomeVec2Loc = gl.getUniformLocation(someProgram, "u_someThing.someVec2");
+```
+
+
 
 
 
@@ -105,17 +176,82 @@ canvas和svg一样，大小也有两套。canvas本身的大小、js代码操作
 
 颜色的确是rgb，不过每种数值的范围都是0-1了，如0.2表示51  （51,255,0,.5) 在webgl中(0.2, 1, 0, 0.5)
 
-#### vec4
+#### glsl
 
-有四个浮点数据的数据类型 {x:0, y:0, z:0, w:1}   可以这样取值：vec4Var.xy
+图片库着色器语言
+
+##### 变量
+
+常见类型：`int`  `ivec2` `ivec3` `ivec4` `float`, `vec2`, `vec3`, `vec4`, `mat2`, `mat3`   `mat4` `samplerCube `  `sampler2D` `bool` `bvec2` `bvec3` ……数据类型
+
+它内建的数据类型例如`vec2`, `vec3`和 `vec4`分别代表两个值，三个值和四个值
+
+`mat2`, `mat3` 和 `mat4` 分别代表 2x2, 3x3 和 4x4 矩阵
 
 ``` glsl
-attribute vec4 a_position;
-uniform vec2 u_resolution;
-void main() {
-    vec2 zeroToOne = a_position.xy / u_resolution;
-    ... ...
+vec4 a = vec4(1, 2, 3, 4);
+vec4 b = a * 2.0;
+// b 现在是 vec4(2, 4, 6, 8);
+vec4 c=b/a;
+// c 现在是 vec4(2,2,2,2);
+
+mat4 a = ???
+mat4 b = ???
+mat4 c = a * b;
+ 
+vec4 v = ???
+vec4 y = c * v;   //mat4 * vec4 结果是一个 vec4
 ```
+
+##### vec4
+
+对于变量 vec4  v 可以如下矢量调制：
+
+- `v.x` 和 `v.s` 以及 `v.r` ， `v[0]` 表达的是同一个分量。
+- `v.y` 和 `v.t` 以及 `v.g` ， `v[1]` 表达的是同一个分量。
+- `v.z` 和 `v.p` 以及 `v.b` ， `v[2]` 表达的是同一个分量。
+- `v.w` 和 `v.q` 以及 `v.a` ， `v[3]` 表达的是同一个分量。
+
+
+
+v.yyyy 和 vec4(v.y, v.y, v.y, v.y) 是一样的，四个分量都是一样的，都是原第二个分类。
+
+类似的还有 v.bagr    vec4(v.rgb, 0.5)   v.xy是一个vec2类型的数据
+
+vec4(1)  等同于 vec4(1,1,1,1)
+
+##### 强类型
+
+``` glsl
+float f = 1;  // 错误，1是int类型，不能将int型赋值给float
+
+float f = 1.0;      // 使用float
+float f = float(1)  // 转换integer为float
+```
+
+上例中 `vec4(v.rgb, 1)` 不会因为 `1` 报错，因为 `vec4` 内部进行了转换类似 `float(1)` 。
+
+##### 多类型运算
+
+如：  T sin(T angle)  T支持float`, `vec2`, `vec3` 或 `vec4
+
+vec4 s = sin(v);    等价于：  vec4 s = vec4(sin(v.x), sin(v.y), sin(v.z), sin(v.w));
+
+``` glsl
+// 有时一个参数是浮点型而剩下的都是 `T` ，意思是那个浮点数据会作为所有其他参数的一个新分量。 例如如果 `v1` 和 `v2` 是 `vec4` 同时 `f` 是浮点型，那么
+vec4 m = mix(v1, v2, f);
+// 等价于：
+vec4 m = vec4(
+  mix(v1.x, v2.x, f),
+  mix(v1.y, v2.y, f),
+  mix(v1.z, v2.z, f),
+  mix(v1.w, v2.w, f));
+// 这样就可以解释了 出现的 vec2/vec2 结果是一个 vec2 了
+```
+
+
+
+
 
 
 
