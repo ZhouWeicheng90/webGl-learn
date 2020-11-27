@@ -47,6 +47,7 @@
     }
     </script>
 <canvas id="cvs" style="border: 1px solid #eee;" width="500" height="500">你的浏览器不支持canvas</canvas>
+<img src="./leaves.jpg" width="280" height="200" style="line-height: 480px;vertical-align: top;margin-top: 10px;">
 <script>
     /** @type {HTMLCanvasElement} */
     const canvas = document.getElementById('cvs')
@@ -133,15 +134,18 @@
         gl.uniform2f(textureSizeLocation, image.width, image.height);
 
         // 卷积：        
-        // var edgeDetectKernel = [-1, -1, -1, -1, 8, -1, -1, -1, -1];   // 卷积模板 edgeDetect 
-        var edgeDetectKernel = [0, -1, 0, -1, 5, -1, 0, -1, 0] // 卷积模板 sharpness
+        // var edgeDetectKernel = [-1, -1, -1, -1, 8, -1, -1, -1, -1];   // 卷积模板 edgeDetect 边缘检测
+        var edgeDetectKernel = [0, -1, 0, -1, 5, -1, 0, -1, 0] // 卷积模板 sharpness 锐化
+        // var edgeDetectKernel = [-2, -1, 0, -1, 1, 1, 0, 1, 2] // 卷积模板 emboss 浮雕
+        // var edgeDetectKernel = [0.045, 0.122, 0.045, 0.122, 0.332, 0.122, 0.045, 0.122, 0.045] // 卷积模板 gaussianBlur 高斯模糊
+        
+
         function computeKernelWeight(kernel) {
             var weight = kernel.reduce(function (prev, curr) {
                 return prev + curr;
             });
             return weight <= 0 ? 1 : weight;
         }
-
         var kernelLocation = gl.getUniformLocation(program, "u_kernel[0]");    // 注意这里取的是[0]，这是对数组赋值的方式/技巧吗？
         var kernelWeightLocation = gl.getUniformLocation(program, "u_kernelWeight");
         gl.uniform1fv(kernelLocation, edgeDetectKernel);
