@@ -1,0 +1,36 @@
+<canvas id="cvs" height="500" width="500" style="border: 1px solid #eee;"></canvas>
+<script type="module">
+    import { getProgram, m3 } from './utils.js'
+    /** @type {HTMLCanvasElement} */
+    const canvas = document.getElementById('cvs')
+    const gl = canvas.getContext('webgl')
+
+    getProgram(gl, './2d.vert', './2d.frag').then((/** @type {WebGLProgram} */program) => {
+        gl.useProgram(program)
+        const aPositionLoc = gl.getAttribLocation(program, 'a_position')
+        const uTransformLoc = gl.getUniformLocation(program, 'u_transform')
+        // 先缩放，后旋转，最后平移是正解！
+        let mat = m3()
+            // .scale(.4, .6)   // 非等比缩放 会变形
+            .rotate(45)   // 旋转不会引起变形！！
+            .translate(300, 100)
+            .project(gl.canvas.width, gl.canvas.height)
+            .result()
+
+        console.log(mat)
+        gl.uniformMatrix3fv(uTransformLoc, false, mat)
+
+        const positionBuffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 200, 0, 0, 200]), gl.STATIC_DRAW)
+
+        gl.enableVertexAttribArray(aPositionLoc)
+        gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, 0, 0)
+        gl.drawArrays(gl.TRIANGLES, 0, 3)
+    });
+
+
+
+
+
+</script>

@@ -1,0 +1,53 @@
+<canvas id="cvs" width="500" height="500" style="border:1px solid #eee;"></canvas>
+<script type="x-shader/x-vertex" id="vertex-shader">
+    attribute vec2 f
+    void main(){
+        gl_posi
+    }
+
+</script>
+<script type="glsl" id="fragment-shader">
+
+</script>
+<script>
+    let vertex_shader=`
+    att
+    `
+    // 有时间做一个 不断旋转的三角形，旋转中心，三角函数 x sin(A+B), y cos(A+B)
+    // 缩放 vec2 scaledPosition = a_position * u_scale;  uniform vec2 u_scale;  1表示不缩放，负数会翻转
+
+    // 所有的操作都是基于坐标原点的，那么一组操作执行顺序不同，结果必然不同。主要基准点的影响，正确的做法应该是这样的：
+    // 移动到缩放中心点 -- 缩放 -- 移动到旋转中心点（注意加上已有的移动）-- 旋转 -- 移动到正确的位置（注意加上已有的移动）
+    // 非常复杂，而且（功能扩展时）可能需要修改已有着色器！
+    // ———— 使用二维矩阵，可以简化：
+    
+    // 原位置坐标 2变3 ： [x,y,1]
+    var m3 = {
+        translation: function (tx, ty) {
+            return [
+                1, 0, 0,
+                0, 1, 0,
+                tx, ty, 1,  
+            ];
+        },  // [x,y,1] * matrix = [x+tx,y+ty,1]
+
+        rotation: function (angleInRadians) {
+            var c = Math.cos(angleInRadians);
+            var s = Math.sin(angleInRadians);
+            return [
+                c, -s, 0,
+                s, c, 0,
+                0, 0, 1,
+            ];
+        },  //  matrix*[x,y,1] * = [x*c-y*s, y*c+x*s, 1] 
+
+        scaling: function (sx, sy) {
+            return [
+                sx, 0, 0,
+                0, sy, 0,
+                0, 0, 1,
+            ];  // [x,y,1] * matrix = [x*sx, y*sy, 1]
+        },
+        
+    };
+</script>
