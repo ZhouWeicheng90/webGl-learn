@@ -169,27 +169,6 @@ export function d2(right2left = true) {
     }
     return obj
 }
-// 文档中矩阵相乘是反着的，个人感觉不好理解
-// 文档认为是右结合的方式，感觉操作的都是坐标系，整个坐标系在旋转，在缩放，在平移，这与文档说明的完全相反，感觉左结合方式才是操作图形，可能是左右脑的区别吧。
-// 思考右结合  缩放 平移，先缩放导致平移距离等比缩放了；旋转 平移，先旋转 导致平移方向变了。
-// mat*vec 矩阵必须在前，否则无效！（矢量是一个竖型的矩阵）
-
-// 正射投影
-// 3d中，宽高的运用范围是 0-width，0-height，但depth的范围则是 -depth/2到depth/2
-// 现在对于depth我们不平移-1， 那么 0-depth对应的gl坐标是0-2，  实际使用的范围正好对应 -1 到 1 
-
-// 通过透视矩阵明确了 vec4是一个 1*3矩阵， 而mat4*vec4 进而明确了：glsl中矩阵相乘是右结合的！！！
-// 开启右结合思维的图形（实在不符合我的思维习惯）
-
-// float zToDivideBy = 1.0 + position.z * u_fudgeFactor;  // 生成透视投影因子    
-// gl_Position = vec4(position.xy / zToDivideBy, position.zw);  // x,y除以透视因子
-// gl_Position = vec4(position.xyz, zToDivideBy);    // w 就是透视因子，这一句和上一句是等价的！
-// z越大，开起来越小，z越大，物体越远。这和css z-index 不一样哦！
-
-// z2m方法中，直接将 (x,y,z,w)*matrix变成（x,y,z, 1 + z*factor+w) 
-
-// vec4 中xyzw z默认是0，w默认是1，所以在三维的position中，看起来比二维简洁
-
 
 export function d3(right2left = true) {
     let matx = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
