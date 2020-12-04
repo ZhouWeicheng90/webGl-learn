@@ -1,0 +1,82 @@
+<canvas id="cvs" height="500" width="500" style="border: 1px solid #eee;"></canvas>
+<div>
+    rotateX: <input type="range" name="" id="rotateX" value="0" min="-180" max="180" onchange="inputChange()"> <span
+        id="rotateXV">0</span>度
+</div>
+<div>
+    rotateY: <input type="range" name="" id="rotateY" value="0" min="-180" max="180" onchange="inputChange()"> <span
+        id="rotateYV">0</span>度
+</div>
+<div>
+    rotateZ: <input type="range" name="" id="rotateZ" value="0" min="-180" max="180" onchange="inputChange()"> <span
+        id="rotateZV">0</span>度
+</div>
+<script type="module">
+    import { getProgram, d3, FGeo, colors4FGeo, trangleGeo, colors4trangleGeo } from './utils.js'
+    // 
+
+    window.inputChange = function () {
+        console.log('==')
+        function fn1(inputId, valueId) {
+            const input = document.getElementById(inputId)
+            const span = document.getElementById(valueId)
+            span.innerText = input.value
+            return +input.value
+        }
+        draw3D(fn1("rotateX", "rotateXV"), fn1("rotateY", "rotateYV"), fn1("rotateZ", "rotateZV"));
+    }
+    /** @type {HTMLCanvasElement} */
+    const canvas = document.getElementById('cvs')
+    const gl = canvas.getContext('webgl')
+    const geo = FGeo;
+    const color = colors4FGeo
+    const fudgeFactor = 1
+    getProgram(gl, './3d.vert', './3d.frag').then((/** @type {WebGLProgram} */program) => {
+        const uMatrixLoc = gl.getUniformLocation(program, 'u_matrix')
+        function init() {
+            const aPositionLoc = gl.getAttribLocation(program, 'a_position')
+            const positionBuffer = gl.createBuffer()
+            gl.useProgram(program)
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(geo), gl.STATIC_DRAW)
+            gl.enableVertexAttribArray(aPositionLoc)
+            gl.vertexAttribPointer(aPositionLoc, 3, gl.FLOAT, false, 0, 0)
+
+            const aColorLoc = gl.getAttribLocation(program, "a_color");
+            const colorBuffer = gl.createBuffer()
+            gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer)
+            gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(color), gl.STATIC_DRAW)
+            gl.enableVertexAttribArray(aColorLoc);
+            var normalize = true;  // 标准化数据 (从 0-255 转换到 0.0-1.0)
+            gl.vertexAttribPointer(aColorLoc, 3, gl.UNSIGNED_BYTE, normalize, 0, 0)
+
+            // const fudgeLocation = gl.getUniformLocation(program, "u_fudgeFactor");
+            // gl.uniform1f(fudgeLocation, fudgeFactor);
+
+            gl.enable(gl.CULL_FACE)
+            gl.enable(gl.DEPTH_TEST)
+        }
+        init()
+        // 先缩放，后旋转，最后平移是正解！
+        window.draw3D = function (rx, ry, rz) {
+            let mat = d3(false)
+                .translate(-80, -80, 0)
+                // .scale(.9, .9, .9)
+                .rotateX(rx)
+                .rotateY(ry)
+                .rotateZ(rz)
+                .translate(0, 0, -900)
+                .perspective(60, gl.canvas.width / gl.canvas.height, 1, 2000)
+
+                // .projection(gl.canvas.width, gl.canvas.height, gl.canvas.height,fudgeFactor)
+                // .project(gl.canvas.width, gl.canvas.height, gl.canvas.height)
+                // .z2m(fudgeFactor)
+                .result()
+
+            console.log(mat)
+            gl.uniformMatrix4fv(uMatrixLoc, false, mat)
+            gl.drawArrays(gl.TRIANGLES, 0, geo.length / 3)
+        }
+        draw3D(0, 0, 0);
+    });
+</script>
