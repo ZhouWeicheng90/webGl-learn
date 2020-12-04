@@ -12,11 +12,8 @@
         id="rotateZV">0</span>度
 </div>
 <script type="module">
-    import { getProgram, d3, FGeo, colors4FGeo, trangleGeo, colors4trangleGeo } from './utils.js'
-    // 
-
-    window.inputChange = function () {
-        console.log('==')
+    import { getProgram, d3, FGeo, colors4FGeo, trangleGeo, colors4trangleGeo } from './utils.js'   
+    window.inputChange = function () {        
         function fn1(inputId, valueId) {
             const input = document.getElementById(inputId)
             const span = document.getElementById(valueId)
@@ -60,15 +57,15 @@
         // 先缩放，后旋转，最后平移是正解！
         window.draw3D = function (rx, ry, rz) {
             let mat = d3(false)
-                .translate(-80, -80, 0)
+                .translate(-80, -80, -15)
                 // .scale(.9, .9, .9)
                 .rotateX(rx)
                 .rotateY(ry)
                 .rotateZ(rz)
-                .translate(0, 0, -900)
-                .perspective(60, gl.canvas.width / gl.canvas.height, 1, 2000)
+                .translate(280, 280, 0)
+                // .perspective(60, gl.canvas.width / gl.canvas.height, 1, 2000)
 
-                // .projection(gl.canvas.width, gl.canvas.height, gl.canvas.height,fudgeFactor)
+                .projection(gl.canvas.width, gl.canvas.height, 800,fudgeFactor)
                 // .project(gl.canvas.width, gl.canvas.height, gl.canvas.height)
                 // .z2m(fudgeFactor)
                 .result()
