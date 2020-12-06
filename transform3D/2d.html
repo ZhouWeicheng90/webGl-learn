@@ -1,6 +1,6 @@
 <canvas id="cvs" height="500" width="500" style="border: 1px solid #eee;"></canvas>
 <script type="module">
-    import { getProgram, d2 } from './utils.js'
+    import { getProgram, d2, d2_left } from '../utils/index.js'
     /** @type {HTMLCanvasElement} */
     const canvas = document.getElementById('cvs')
     const gl = canvas.getContext('webgl')
@@ -10,9 +10,16 @@
         const aPositionLoc = gl.getAttribLocation(program, 'a_position')
         const uTransformLoc = gl.getUniformLocation(program, 'u_transform')
         // 先缩放，后旋转，最后平移是正解！
-        let mat = d2(false)
-            .scale(.4, .6)   // 非等比缩放 会变形
-            .rotate(45)   // 旋转不会引起变形！！
+        // let mat = d2()
+        //     .project(gl.canvas.width, gl.canvas.height)
+        //     .translate(300, 100)
+        //     .rotate(45)   
+        //     .scale(.4, .6)   
+        //     .result()
+
+        let mat = d2_left()
+            .scale(.4, .6)
+            .rotate(45)
             .translate(300, 100)
             .project(gl.canvas.width, gl.canvas.height)
             .result()
