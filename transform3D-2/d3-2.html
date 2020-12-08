@@ -1,0 +1,79 @@
+<canvas id="cvs" height="600" width="600" style="border: 1px solid #eee;"></canvas>
+<script type="module">
+    import { getProgram, d3, FGeo, colors4FGeo, appendLabel, multipleMatrix } from '../utils/index.js'
+    const data = {
+        cameraDeg: 30,
+        radius: 400,
+        fNums: 9
+    }
+    function addLabel(key, min, max) {
+        appendLabel(key, data[key], min, max, v => {
+            data[key] = v
+            draw3D();
+        })
+    }
+
+    window.onload = function () {
+        /** @type {HTMLCanvasElement} */
+        const canvas = document.getElementById('cvs')
+        const gl = canvas.getContext('webgl')
+        addLabel('cameraDeg', 0, 360)
+        addLabel('radius',100,600)
+        getProgram(gl, '../transform3D/3d.vert', '../transform3D/3d.frag').then((/** @type {WebGLProgram} */program) => {
+            (function () {
+                const positionLocation = gl.getAttribLocation(program, "a_position");
+                const colorLocation = gl.getAttribLocation(program, "a_color");
+
+                gl.useProgram(program);
+                const positionBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(FGeo), gl.STATIC_DRAW);
+                gl.enableVertexAttribArray(positionLocation);
+                gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 0, 0);
+
+                const colorBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(colors4FGeo), gl.STATIC_DRAW);
+                gl.enableVertexAttribArray(colorLocation);
+                gl.vertexAttribPointer(colorLocation, 3, gl.UNSIGNED_BYTE, true, 0, 0);
+
+                gl.enable(gl.CULL_FACE);
+                gl.enable(gl.DEPTH_TEST);
+            })()
+            const prespectiveMatrix = d3()
+                .perspective(60, gl.canvas.clientWidth / gl.canvas.clientHeight, 1, 2000)
+                .result()
+            const matrixLocation = gl.getUniformLocation(program, "u_matrix");
+
+
+            window.draw3D = function () {
+                const viewProjectMatrix = (function (deg) {
+                    let matrix = d3()
+                        .rotateY(deg)
+                        .translate(0, 0, data.radius * 1.5)
+                        .inverse() // 前面两句是 转动+移动相机的矩阵,然后求出这个矩阵的逆矩阵，就是图形的矩阵。  AB=E，则A、B互为逆矩阵
+                        .result();
+                    return multipleMatrix(4, matrix, prespectiveMatrix)
+                })(data.cameraDeg)
+
+                // Compute the position of the first F
+                var fPosition = [data.radius, 0, 0];
+
+                for (let i = 0, deg = 360 / data.fNums; i < data.fNums; i++) {
+                    // console.log(viewProjectMatrix)
+                    let matrix = d3(viewProjectMatrix)
+                        .rotateY(deg * i)
+                        .translate(data.radius, 0, 0)
+                        .rotateX(180)
+                        .translate(-80, -80, -15)
+                        .result()
+                    gl.uniformMatrix4fv(matrixLocation, false, matrix);
+                    gl.drawArrays(gl.TRIANGLES, 0, FGeo.length / 3);
+                }
+            }
+            draw3D()
+        })
+
+        // lookAt场景实现 涉及到向量叉乘的问题，矩阵是没有叉乘的！向量叉乘产生了一个，垂直于两个向量的向量。
+    }
+</script>

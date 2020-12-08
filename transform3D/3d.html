@@ -1,50 +1,43 @@
 <canvas id="cvs" height="500" width="500" style="border: 1px solid #eee;"></canvas>
 <script type="module">
-    import { getProgram, d3, d3_left, d3z, d3z_left, FGeo, colors4FGeo, trangleGeo, colors4trangleGeo } from '../utils/index.js'
-
+    import { getProgram, d3, d3_left, d3z, d3z_left, FGeo, colors4FGeo, trangleGeo, colors4trangleGeo, appendLabel } from '../utils/index.js'
     const geo = FGeo;
     const color = colors4FGeo
     const fudgeFactor = 1
-    // 垂直透视投影值：
-    const data = {
-        rotateX: -49,
-        rotateY: -41,
-        rotateZ: -26,
-        x: 210,
-        y: 210,
-        z: 50,
-    }
-
-    // // d 透视投影初始值：
+    // // z 垂直透视投影值：
     // const data = {
-    //     rotateX: -24,
+    //     rotateX: -49,
     //     rotateY: -41,
     //     rotateZ: -26,
-    //     x: 50,
-    //     y: 0,
-    //     z: 408,
+    //     x: 210,
+    //     y: 210,
+    //     z: 50,
     // }
-    function appendLabel(key, value, min, max) {
-        let str = ` <label style="display:block;">
-                        ${key}: <input type="range" value="${value}" min="${min}" max="${max}" oninput="inputChange('${key}',this.value)">
-                        <span id="${key}">${value}</span>
-                    </label>`
-        document.body.innerHTML += str
+
+    // d 透视投影初始值：
+    const data = {
+        rotateX: -24,
+        rotateY: -41,
+        rotateZ: -26,
+        x: 50,
+        y: 0,
+        z: 408,
+    }
+
+    function addLabel(key, min, max) {
+        appendLabel(key, data[key], min, max, v => {
+            data[key] = v
+            draw3D();
+        })
     }
 
     window.onload = function () {
-        appendLabel('rotateX', data.rotateX, -180, 180)
-        appendLabel('rotateY', data.rotateY, -180, 180)
-        appendLabel('rotateZ', data.rotateZ, -180, 180)
-        appendLabel('x', data.x, 0, 680)
-        appendLabel('y', data.y, 0, 680)
-        appendLabel('z', data.z, 0, 1880)
-        window.inputChange = function (key, value) {
-            data[key] = value
-            document.getElementById(key).innerText = value
-            draw3D();
-        }
-
+        addLabel('rotateX', -180, 180)
+        addLabel('rotateY', -180, 180)
+        addLabel('rotateZ', -180, 180)
+        addLabel('x', 0, 680)
+        addLabel('y', 0, 680)
+        addLabel('z', 0, 1880)
 
         /** @type {HTMLCanvasElement} */
         const canvas = document.getElementById('cvs')
@@ -125,7 +118,7 @@
                         .result();
                 }
 
-                let mat = z();
+                let mat = d();
 
                 console.log(mat)
                 gl.uniformMatrix4fv(uMatrixLoc, false, mat)

@@ -1,0 +1,43 @@
+<head>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%
+        }
+    </style>
+</head>
+<script src="../utils/three.js"></script>
+<script>
+    window.onload = function () {
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);  // 透视相机，参数分别是视野角度（必须是角度单位），长宽比，near，far
+        var renderer = new THREE.WebGLRenderer();  // 多种渲染器备用，在老的浏览器中可以降级！
+        // 场景，相机，渲染器
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        // renderer.setSize(window.innerWidth/2, window.innerHeight/2,false);  // 第三个参数，可选，false表示缩放渲染器的展示到100%，这里表示满屏 但是分辨率较低
+        // 设置渲染器的尺寸很重要：
+        document.body.appendChild(renderer.domElement);
+
+        var geometry = new THREE.BoxGeometry(1, 1, 1);
+        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        var cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+
+        camera.position.z = 5;
+
+        var animate = function () {
+            requestAnimationFrame(animate);  //requestAnimationFrame 当用户切换到其它的标签页时，它会暂停，不会浪费用户宝贵的处理器资源
+
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+
+            renderer.render(scene, camera);
+        };
+
+        animate();
+    }
+</script>
