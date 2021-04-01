@@ -26,6 +26,21 @@ class Base {
         return this.matx
     }
 }
+
+/**
+ * 
+ * @typedef {{
+ * result:()=>number[],
+ * translate:(tx:number,ty:number)=>D2,
+ * rotate:(deg:number)=>D2,
+ * scale:(sx:number,sy:number)=>D2
+ * }} D2
+ */
+
+ /**
+ * @returns {D2}
+ * @param {number[]} [matrix] 
+ */
 export function d2(matrix) {
     let obj = new Base(matrix)
     Object.assign(obj, {
@@ -49,6 +64,10 @@ export function d2(matrix) {
     return obj
 }
 
+/**
+ * @returns {D2}
+ * @param {number[]} [matrix] 
+ */
 export function d2_left(matrix) {
     let obj = new Base(matrix)
     Object.assign(obj, {

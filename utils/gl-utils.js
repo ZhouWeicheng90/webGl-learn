@@ -3,7 +3,7 @@
  * @param {string} url 
  * @returns {Promise<string>}
  */
-export function getText(url) {
+function getText(url) {
     const xhr = new XMLHttpRequest()
     xhr.open('get', url)
     xhr.send()
@@ -30,7 +30,7 @@ export function getText(url) {
  * @param {number} type 
  * @param {string} source 
  */
-export function getShader(gl, type, source) {
+function getShader(gl, type, source) {
     const shader = gl.createShader(type)
     gl.shaderSource(shader, source)
     gl.compileShader(shader)

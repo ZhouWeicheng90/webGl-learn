@@ -12,7 +12,7 @@ webgl2  实验性 高级的webgl
 
 #### webgl简介
 
-
+WebGL 元素可以和其他 HTML 元素混合使用，并且可以和网页其他部分或者网页背景结合起来。
 
 渲染管线
 
@@ -63,7 +63,18 @@ The only functions that actually write pixels are `gl.clear`, `gl.drawArrays` an
 // vec4 中xyzw z默认是0，w默认是1，所以在三维的position中，看起来比二维简洁
 ```
 
+gl_PointSize、
 
+``` glsl
+//给内置变量gl_PointSize赋值像素大小
+gl_PointSize=20.0;
+```
+
+
+
+gl_Position、
+
+gl_FragColor
 
 #### 4种数据方式
 
