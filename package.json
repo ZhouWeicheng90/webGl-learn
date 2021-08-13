@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/ZhouWeicheng90/webGl-learn#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "express-http-proxy": "^1.6.2"
   }
 }
